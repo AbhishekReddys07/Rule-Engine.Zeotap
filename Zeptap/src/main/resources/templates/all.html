@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Evaluation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        label, button { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Rule Evaluation System</h1>
+    <h2>Create Rule</h2>
+    <textarea id="ruleString" rows="4" cols="50" placeholder="Enter rule string (e.g., age < 30 AND salary > 50000)"></textarea>
+    <br>
+    <button onclick="createRule()">Create Rule</button>
+    
+    <h2>Combine Rules</h2>
+    <textarea id="combineRules" rows="4" cols="50" placeholder="Enter rule strings, one per line"></textarea>
+    <br>
+    <button onclick="combineRules()">Combine Rules</button>
+    
+    <h2>Evaluate Rule</h2>
+    <textarea id="jsonRule" rows="4" cols="50" placeholder="Enter JSON representation of the rule"></textarea>
+    <br>
+    <textarea id="attributes" rows="4" cols="50" placeholder="Enter attributes as JSON (e.g., {&quot;age&quot;: 35, &quot;department&quot;: &quot;Sales&quot;, &quot;salary&quot;: 60000, &quot;experience&quot;: 3})"></textarea>
+    <br>
+    <button onclick="evaluateRule()">Evaluate Rule</button>
+    
+    <h2>Result</h2>
+    <pre id="result"></pre>
+    
+    <script>
+        async function createRule() {
+            const ruleString = document.getElementById('ruleString').value;
+
+            const response = await fetch('/rules/createNew', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(ruleString)
+            });
+
+            const data = await response.json();
+            alert('Rule Created: ' + JSON.stringify(data));
+        }
+
+        async function combineRules() {
+            const rules = document.getElementById('combineRules').value.split('\n').map(rule => rule.trim()).filter(rule => rule);
+            
+            const response = await fetch('/rules/combine', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(rules)
+            });
+
+            const data = await response.json();
+            alert('Combined Rule: ' + JSON.stringify(data));
+        }
+
+        async function evaluateRule() {
+            const jsonRule = document.getElementById('jsonRule').value;
+            const attributes = document.getElementById('attributes').value;
+
+            const response = await fetch('/rules/evaluateRule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rule: jsonRule, data: JSON.parse(attributes) })
+            });
+
+            const result = await response.json();
+            document.getElementById('result').innerText = 'Evaluation Result: ' + result;
+        }
+    </script>
+</body>
+</html>

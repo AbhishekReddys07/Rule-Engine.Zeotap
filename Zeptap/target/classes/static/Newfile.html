@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine</title>
+    <style>
+        /* Background animation */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Centering container */
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9); /* semi-transparent background */
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #555;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        /* Styling for the result display */
+        #result {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            white-space: pre-wrap; /* Preserves whitespace and formatting */
+            font-family: 'Courier New', Courier, monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .note {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: -10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rule Engine</h1>
+
+        <!-- Form to Create a New Rule -->
+        <form id="createRuleForm">
+            <h2>Create a New Rule</h2>
+            
+            <label for="ruleString">Rule String (e.g., age > 30 AND department = 'Sales'):</label>
+            <input type="text" id="ruleString" name="ruleString" required>
+            <p class="note">Note: Please use a valid string format for the rule, such as 'age > 30 AND department = "Sales"'.</p>
+            <input type="submit" value="Create Rule">
+        </form>
+
+        <div id="result"></div>
+    </div>
+<script>
+    // Handle Create Rule Form Submission
+    document.getElementById('createRuleForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Get the rule string from the input
+        const ruleString = document.getElementById('ruleString').value.trim();
+
+        // Check if the rule string is valid (basic validation)
+        if (ruleString === "") {
+            alert("Please enter a valid rule string.");
+            return;
+        }
+
+        console.log(ruleString); // Debugging: check the rule string being sent
+
+        const submitButton = document.querySelector('input[type="submit"]');
+        submitButton.disabled = true; // Disable the button while sending
+
+        // Send POST request to /createNew endpoint
+        fetch('/createNew', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(ruleString), // Send the rule string as JSON
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json(); // Expecting a JSON response
+        })
+        .then(data => {
+            // Pretty print the JSON response
+            const formattedJSON = JSON.stringify(data, null, 2);
+            document.getElementById('result').innerHTML = `<h3>Response:</h3><pre>${formattedJSON}</pre>`;
+        })
+        .catch(error => {
+            document.getElementById('result').innerHTML = `<h3>Error:</h3><pre>${error.message}</pre>`;
+        })
+        .finally(() => {
+            submitButton.disabled = false; // Re-enable the button once done
+        });
+    });
+</script>
+
+</body>
+</html>
